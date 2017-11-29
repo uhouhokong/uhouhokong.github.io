@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--<link rel="stylesheet" href="css/base.css">-->
+  <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script src="script.js"></script>
+</head>
+<body>
+  <p>
+    bpmを入力するには一度楽曲を停止してください<br>
+    <button id="playButton" onclick="playAndPauseSound()">楽曲を再生する</button>
+    <button onclick="stopSound()">楽曲を停止する</button><br>
+    <form name="js">
+      bpm<input type="text" name="bpmBox" value="165.17">
+    </form>
+    <span id="bgmBoxEx"></span><br>
+    Instanse:<span id="bgmInstance">***</span><br>
+    Name:<span id="bgmName">***</span><br>
+    Paused:<span id="bgmPaused">***</span><br>
+    Pos:<span id="bgmPos">***</span><br>
+    <button onclick="ticktack([4])">clap</button><br>
+    楽曲素材: <a href="http://www.manbou2ndclass.net/">まんぼう特攻隊</a><br>
+    効果音素材: <a href="http://osabisi.sakura.ne.jp/m2/">ザ・マッチメイカァズ</a>
+  </p>
+</body>
+</html>
