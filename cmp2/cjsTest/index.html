@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--<link rel="stylesheet" href="css/base.css">-->
+  <!-- -->
+  <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script src="mainField.js"></script>
+</head>
+<body>
+  <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       その1　メインのプレイフィールド
+       担当 m
+  -->
+  <p>
+    <h1></h1>
+    <canvas id="mainField" width="960" height="540"></canvas>
+  </p>
+
+  <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       その2　各パートパターン選択
+       担当 o, k
+  -->
+  <p>
+    <h1>各パートパターン選択</h1>
+  </p>
+
+  <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       その3　セッション選択
+       担当 o, k
+  -->
+  <p>
+    <h1>セッション選択</h1>
+  </p>
+
+
+  <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       ´・_・`    セサミサンドイッチくん
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <p>
+    bpmを入力するには一度楽曲を停止してください<br>
+    <button id="playButton" onclick="playAndPauseSound()">楽曲を再生する</button>
+    <button onclick="stopSound()">楽曲を停止する</button><br>
+    <form name="js">
+      bpm<input type="text" name="bpmBox" value="165.17">
+    </form>
+    <span id="bgmBoxEx"></span><br>
+    Instanse:<span id="bgmInstance">***</span><br>
+    Name:<span id="bgmName">***</span><br>
+    Paused:<span id="bgmPaused">***</span><br>
+    Pos:<span id="bgmPos">***</span><br>
+    <button onclick="ticktack([4])">clap</button><br>
+    楽曲素材: <a href="http://www.manbou2ndclass.net/">まんぼう特攻隊</a><br>
+    効果音素材: <a href="http://osabisi.sakura.ne.jp/m2/">ザ・マッチメイカァズ</a>
+  </p>
+</body>
+</html>
