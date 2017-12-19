@@ -48,43 +48,158 @@ class Area{
   
 }
 
+var state = 0;
+var soundDampable;
+
 var areas =[];
+var myCursor;
+var touching = 0;
 var playingSound;
 var playingRate;
-var myCursor;
+
+//状態のあれ
+function changeState(nextState){
+  console.log("state: "+state+" -> "+nextState);
+  state = nextState;
+  stateWakeup();
+  console.log(areas);
+}
+
+var count;
+function stateWakeup(){
+  switch(state){
+  case 0://準備
+    count = 0;
+  case 1://準備
+    soundDampable = false;
+
+    break;
+
+  case 2://実験１回目
+    areas.shift();
+    break;
+
+  case 3://準備
+    soundDampable = !soundDampable;
+
+    playingSound.stop();
+    playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });//
+    areas.unshift(new Area(0, 0, width*2, height*2, 1, color(130, 80), "sound_100.mp3", 1));
+    break;
+
+  case 4://実験２回目
+    areas.shift();
+    break;
+  case 5://終了
+    areas.unshift(new Area(0, 0, width*2, height*2, 1, color(130, 80), "sound_100.mp3", 1));
+    break;
+  }
+}
+
+var really = false;
+var reallyTime = 0;
+
+function stateUpdate(){
+  count++;
+  if(playingSound == undefined)return;
+  textSize(32);
+  textAlign(CENTER);
+  fill(255);
+
+  if(state == 0){
+    
+    if(count > 20)text("画面内をクリックすると 次のステップへと進みます。", width/2, height/6);
+    else text("準備中...", width/2, height/6);
+  }
+  else if(state == 1 || state == 3){
+    playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });
+    text("数秒間待つと 実験が開始されます。", width/2, height/6);
+    if(playingSound.position > 3000/ playingRate){
+      changeState(state+1);
+    }
+  }else if(state == 5){
+    text("実験は以上です お疲れ様でした。\n画面内クリックで音声のon/off", width/2, height/8);
+  }else{
+    if(playingSound.position > 6000 / playingRate){
+      fill(130);
+      if(really == false){
+        reallyTime = 0;
+        text("アンケート記入を促す文\n画面内をクリックすると 次のステップへと進みます。", width/2, height/8);
+      }
+      
+      else{
+        reallyTime++;
+        if(!areas[areas.length-1].mouseover(mouseX, mouseY))really = false;
+        fill(200, 120, 120);
+        if(reallyTime > 90) text("アンケートの記入は完了しましたか？\nもう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
+        else                text("アンケートの記入は完了しましたか？\n 時間をおいて もう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
+      }
+      
+    }
+  }
+}
+
+function mouseClicked(){
+  if(state == 0 && count > 20){
+    if(areas[areas.length-1].mouseover(mouseX, mouseY))changeState(1);
+  }
+  if(state == 2 || state == 4){
+    if(playingSound.position > 6000 / playingRate){
+      if(really == false){really = true;}
+      else{
+        if(areas[areas.length-1].mouseover(mouseX, mouseY) && reallyTime > 90){
+          changeState(state+1);really=false;
+        }
+      }
+      
+    }
+  }
+  if(state == 5){
+    
+    if(areas[areas.length-1].mouseover(mouseX, mouseY))playingSound.paused = !playingSound.paused;
+  }
+}
 
 function setup() {
   createCanvas(1080, 720);
-  //音声ファイル名は"sound_<再生倍率(百分率)>.wav"で
-  //areas[]はマウスオーバーの優先度順(降順)にソートされています
-  areas.push(new Area(width/4, height/2, width/3, height/2, 1.2, color(200, 230, 180), "sound_70.mp3", 0.7));
-  areas.push(new Area(width*3/4, height/2, width/3, height/2, 3, color(130, 120, 170), "sound_45.mp3", 0.45));
-  areas.push(new Area(0, 0, width*2, height*2, 1, color(250,250,250), "sound_100.mp3", 1));
   myCursor = new MyCursor(0,0,6.5);
   noCursor();
+  
+}
+
+window.onload = function () {
+  playingSound = loadSound("sound_100.mp3");
+  playingRate = 1;
+
+  //areas[]はマウスオーバーの優先度順(降順)にソート
+  areas.push(new Area(width/2, height/2, width, height, 1, color(130, 150), "sound_100.mp3", 1));
+  areas.push(new Area(width/4, height/2, width/3, height/2, 1.2, color(200, 230, 180), "sound_70.mp3", 0.7));
+  areas.push(new Area(width*3/4, height/2, width/3, height/2, 3, color(130, 120, 170), "sound_45.mp3", 0.45));
+  areas.push(new Area(width/2, height/2, width, height, 1, color(250,250,250), "sound_100.mp3", 1));
+  changeState(0);//init state
 }
 
 function draw() {
-	background(255);
+  background(255);
+  
+  
+  //マウスオーバーの検出、処理
 	for(let i=0; i<areas.length; i++){//順走査
   	if(areas[i].mouseover(myCursor.x, myCursor.y)){
+      touching = i;
       myCursor.visco = areas[i].visco;
+      if(soundDampable)
       if(playingSound!=areas[i].sound)changeSound(playingSound, playingRate, areas[i].sound, areas[i].soundRate);
       break;
     }
   }
-  rect(20,10,10,10);
-  //
-  for(let i=areas.length-1; i>=0; i--) areas[i].draw();//逆走査
-  myCursor.draw();
-  
-  
-  
-  rect(10,10,10,10);
-}
 
-function mouseClicked(){
-	text("こんにちは", mouseX, mouseY);
+  //描画
+  for(let i=areas.length-1; i>=0; i--) areas[i].draw();//逆走査
+
+  stateUpdate();
+
+  myCursor.draw();
 }
 
 
@@ -105,48 +220,6 @@ function changeSound(current, currentRate, next, nextRate){//
   playingRate = nextRate;
 }
 
-window.onload = function () {
-  // 使用するサウンドは事前に登録します。
-  // 音声ファイルのパス、任意のIDを指定します。
-  playingSound = loadSound("sound_100.mp3");
-  playingRate = 1;
-  setInterval("mainLoop()", 100);
-  }
-
-  var prePosit;//mainLoop一回につき逐一記録
-function mainLoop() {
-  var posit = playingSound.position;//念のためmainloop進行内での時間ブレをなくす
-  if (playingSound != null) {
-      document.getElementById("playingSound").textContent = playingSound;
-      document.getElementById("bgmName").textContent = "" + playingSound.src;
-      document.getElementById("bgmPaused").textContent = "" + playingSound.paused;
-      document.getElementById("bgmPos").textContent = "" + playingSound.position;
-  }
-  else document.getElementById("playingSound").textContent = playingSound;
-  prePosit = posit;
-}
-
-function playAndPauseSound() {
-  // IDを使って再生します。
-  var playButton = document.getElementById("playButton");
-
-  if (playingSound.paused == false) {
-      if (playingSound.position == 0) {
-          BPM = parseFloat(document.js.bpmBox.value);
-          document.js.bpmBox.disabled = "true";
-          playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });//playは重複しても効果がない
-          playButton.textContent = "楽曲を一時停止する";
-      }
-      else {
-          playingSound.paused = true;
-          playButton.textContent = "楽曲を再生する";
-      }
-  }
-  else {
-      playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0.5 });//playは重複しても効果がない
-      playButton.textContent = "楽曲を一時停止する";
-  }
-}
 function stopSound() {
   // IDを使って停止します。
   playingSound.stop();
