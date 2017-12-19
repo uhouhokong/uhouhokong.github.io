@@ -1,3 +1,12 @@
+let vm = new Vue({
+  el : '#app',
+  data : {
+    oppState : 0,
+    state : 0,
+    really : true
+  }
+});
+
 class MyCursor{
 	constructor(x, y, r) {
     this.x = x;
@@ -71,7 +80,7 @@ function stateWakeup(){
   case 0://準備
     count = 0;
   case 1://準備
-    soundDampable = false;
+    soundDampable = oneFirst;//1/2
 
     break;
 
@@ -94,6 +103,9 @@ function stateWakeup(){
     areas.unshift(new Area(0, 0, width*2, height*2, 1, color(130, 80), "sound_100.mp3", 1));
     break;
   }
+
+  vm.state = state;
+  vm.really = really;
 }
 
 var really = false;
@@ -106,39 +118,43 @@ function stateUpdate(){
   textAlign(CENTER);
   fill(255);
 
-  if(state == 0){
-    
-    if(count > 20)text("画面内をクリックすると 次のステップへと進みます。", width/2, height/6);
-    else text("準備中...", width/2, height/6);
-  }
-  else if(state == 1 || state == 3){
-    playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });
-    text("数秒間待つと 実験が開始されます。", width/2, height/6);
-    if(playingSound.position > 3000/ playingRate){
-      changeState(state+1);
-    }
-  }else if(state == 5){
-    text("実験は以上です お疲れ様でした。\n画面内クリックで音声のon/off", width/2, height/8);
-  }else{
-    if(playingSound.position > 6000 / playingRate){
-      fill(130);
-      if(really == false){
-        reallyTime = 0;
-        text("アンケート記入を促す文\n画面内をクリックすると 次のステップへと進みます。", width/2, height/8);
+
+  switch(state){
+    case 0:
+      if(count > 20)text("画面内をクリックすると 次のステップへと進みます。", width/2, height/6);
+      else text("準備中...", width/2, height/6);
+      break;
+    case 1:
+    case 3:
+      playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });
+      text("数秒間待つと 実験が開始されます。", width/2, height/6);
+      if(playingSound.position > 3000/ playingRate){
+        changeState(state+1);
       }
-      
-      else{
-        reallyTime++;
-        if(!areas[areas.length-1].mouseover(mouseX, mouseY))really = false;
-        fill(200, 120, 120);
-        if(reallyTime > 90) text("アンケートの記入は完了しましたか？\nもう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
-        else                text("アンケートの記入は完了しましたか？\n 時間をおいて もう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
+      break;
+
+    case 5:
+      text("実験は以上です お疲れ様でした。\n画面内クリックで音声のon/off", width/2, height/8);
+      break;
+
+    default:
+      if(playingSound.position > 6000 / playingRate){
+        fill(130);
+        if(really == false){
+          reallyTime = 0;
+          text("画面下部のアンケートのお答えください\n画面内をクリックすると 次のステップへと進みます。", width/2, height/8);
+        }
+        else{
+          reallyTime++;
+          if(!areas[areas.length-1].mouseover(mouseX, mouseY))really = false;
+          fill(200, 120, 120);
+          if(reallyTime > 90) text("アンケートの記入は完了しましたか？\nもう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
+          else                text("アンケートの記入は完了しましたか？\n 時間をおいて もう一度画面内をクリックすると \n次のステップへと進みます。", width/2, height/10);
+        }
       }
-      
-    }
+      break;
   }
 }
-
 function mouseClicked(){
   if(state == 0 && count > 20){
     if(areas[areas.length-1].mouseover(mouseX, mouseY))changeState(1);
@@ -161,12 +177,14 @@ function mouseClicked(){
 }
 
 function setup() {
-  createCanvas(1080, 720);
+  let canvas = createCanvas(1080, 720);
+  canvas.parent("display");
   myCursor = new MyCursor(0,0,6.5);
   noCursor();
   
 }
 
+let oneFirst;
 window.onload = function () {
   playingSound = loadSound("sound_100.mp3");
   playingRate = 1;
@@ -176,6 +194,10 @@ window.onload = function () {
   areas.push(new Area(width/4, height/2, width/3, height/2, 1.2, color(200, 230, 180), "sound_70.mp3", 0.7));
   areas.push(new Area(width*3/4, height/2, width/3, height/2, 3, color(130, 120, 170), "sound_45.mp3", 0.45));
   areas.push(new Area(width/2, height/2, width, height, 1, color(250,250,250), "sound_100.mp3", 1));
+
+  //最初にあれするかを与える
+  oneFirst = (Math.random() > 0.5);
+
   changeState(0);//init state
 }
 
