@@ -1,3 +1,52 @@
+//utility
+var onServerVersion = false;
+
+//データ型に関すること~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//プレイヤー
+var Player = function(){
+    // if(!(this instanceof Player)) return new Player();// new のつけ忘れ時の不具合を矯正
+
+    //コンストラクタ
+    var Player = function(playable){
+        //システム的状態
+        this.playable = playable; //
+        this.id = 0;
+        this.state = 0;
+        this.input =   [[0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0],
+                        [0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1],
+                        [0,0,1,0,0,0,1,1]];
+        //描画関係
+        this.x = 0;
+        this.y = 0;
+        this.wid = 60;
+        this.hig = 90;
+
+        this.sprite = new createjs.Shape();
+        this.sprite.graphics.beginFill("white").moveTo(5, 0).lineTo(-10, +5).lineTo(-10, -5).closePath();
+        stage.addChild(this.sprite);
+    }
+
+    //各メソッドの実装
+    var p = Player.prototype;
+    p.init = function(data){//jsonオブジェクトからいろいろと初期設定
+        this.id = data.id;
+        this.x = data.x * STAGE_W;
+        this.y = data.y * STAGE_H;
+        this.sprite.x = this.x;
+        this.sprite.y = this.y;
+        alert(data.x);
+    }
+
+
+    return Player;
+}
+
+//リソース雛形
+var Resourse = function Resourse(){
+
+}
+
 
 
 
@@ -17,58 +66,95 @@ function loadSeList() {
     }
 }
 
+var stage;
+var players = [];
+var frameCount;
+var STAGE_W;
+var STAGE_H;
+
+function initStage(){//4キャラクタぶんのリズムパターンを渡すx
+    stage = new createjs.Stage("mainField");
+    var canvas = document.getElementById("mainField");
+    STAGE_W = canvas.width;
+    STAGE_H = canvas.height;
+
+    var bg = new createjs.Shape();
+    bg.graphics.beginFill("black").drawRect(0, 0, STAGE_W, STAGE_H);
+    // if(onServerVersion) bg = new createjs.Bitmap("Images/rafu.png");
+    stage.addChild(bg);
+    
+    players.push(new Player(true));
+    players.push(new Player(false));
+    players.push(new Player(false));
+    players.push(new Player(false));
+    
+    $(function() {//jsonからいろいろと初期化
+        alert("あ");
+        $.getJSON("charaList.json" , function(data) {
+            alert("son");
+            for(var i = 0; i < data.players.length; i++) {
+                alert(i);
+                players[i].init(data[i]);
+            }
+        });
+    });
+}
+
+//音楽に関するあたり
+
+var term = 0;
+var A_BAR = 8;//小節ごとの単位
+var termLen = [[A_BAR*2], [A_BAR*2], [A_BAR]];
+
+//メイン処理
 window.addEventListener("load", init);
     function init() {
-      var stage = new createjs.Stage("mainField");
-      var enemyList = []; // 敵の配列
-      var bulletList = []; // 発射弾の配列
-      var count = 0; // フレーム番号
-      var scoreNum = 0; // スコア
-      var STAGE_W = 960; // 画面サイズ
-      var STAGE_H = 540;
-      var bg = new createjs.Shape();
-      bg.graphics.beginFill("black").drawRect(0, 0, STAGE_W, STAGE_H);
-      stage.addChild(bg);
-      bg = new createjs.Bitmap("Images/rafu.png");
-      stage.addChild(bg);
-      // 自機を作成
-      var player = new createjs.Shape();
-      player.graphics.beginFill("white").moveTo(5, 0).lineTo(-10, +5).lineTo(-10, -5).closePath();
-      stage.addChild(player);
-      // スコア欄を作成
-      var score = new createjs.Text("あああ", "24px sans-serif", "white");
-      stage.addChild(score);
-      // タッチ操作も可能にする(iOS,Android向け)
-      if (createjs.Touch.isSupported()) {
+        //背景
+        // var stage = new createjs.Stage("mainField");
+        var players = []; // 敵の配列
+        var bulletList = []; // 発射弾の配列
+        // var count = 0; // フレーム番号
+        var scoreNum = 0; // スコア
+        initStage();
+
+        // 自機を作成
+        var player = new createjs.Shape();
+        player.graphics.beginFill("white").moveTo(5, 0).lineTo(-10, +5).lineTo(-10, -5).closePath();
+        stage.addChild(player);
+        // スコア欄を作成
+        var score = new createjs.Text("あああ", "24px sans-serif", "white");
+        stage.addChild(score);
+        // タッチ操作も可能にする(iOS,Android向け)
+        if (createjs.Touch.isSupported()) {
         createjs.Touch.enable(stage);
-      }
-      // マウスイベントの登録
-      stage.addEventListener("click", handleClick);
-      // tick イベントの登録
-      createjs.Ticker.setFPS(60);
-      createjs.Ticker.addEventListener("tick", handleTick);
+        }
+        // マウスイベントの登録
+        stage.addEventListener("click", handleClick);
+        // tick イベントの登録
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addEventListener("tick", handleTick);
 
-      // クリックした時の処理
-      function handleClick(event) {
-      }
+        // クリックした時の処理
+        function handleClick(event) {
+        }
 
-      // tick イベントの処理
-      function handleTick() {
+        // tick イベントの処理
+        function handleTick() {
         // 自機をマウス座標まで移動させる(減速で移動)
         player.x += (stage.mouseX - player.x) * 0.1;
         player.y += (stage.mouseY - player.y) * 0.1;
         // フレーム番号を更新(インクリメント)
-        count = count + 1;
+        frameCount = frameCount + 1;
         
         // ステージの更新
         stage.update();
-      }
-      function showGameOver() {
+        }
+        function showGameOver() {
         alert("ゲームオーバー！ あなたのスコアは " + scoreNum + " でした。");
         // 各種イベントをまとめて解除
         createjs.Ticker.removeAllEventListeners();
         stage.removeAllEventListeners();
-      }
+        }
     }
 
 
@@ -78,17 +164,17 @@ window.addEventListener("load", init);
 
 
 
-window.onload = function () {
+    window.onload = function () {
     // 使用するサウンドは事前に登録します。
     // 音声ファイルのパス、任意のIDを指定します。
     createjs.Sound.registerSound("nc126967_165.wav");
     bgmInstance = createjs.Sound.createInstance("nc126967_165.wav");
     loadSeList();
     setInterval("mainLoop()", 10);
-}
+    }
 
-var prePosit;//mainLoop一回につき逐一記録
-function mainLoop() {
+    var prePosit;//mainLoop一回につき逐一記録
+    function mainLoop() {
     var posit = bgmInstance.position;//念のためmainloop進行内での時間ブレをなくす
     if (bgmInstance != null) {
         document.getElementById("bgmInstance").textContent = bgmInstance;
@@ -100,14 +186,14 @@ function mainLoop() {
 
     metronome(posit, BPM);
     prePosit = posit;
-}
+    }
 
-function detectBPM() {
+    function detectBPM() {
     // var bpmBox = document.js.bpmBox.value;
 
-}
+    }
 
-function playAndPauseSound() {
+    function playAndPauseSound() {
     // IDを使って再生します。
     var playButton = document.getElementById("playButton");
 
@@ -128,24 +214,24 @@ function playAndPauseSound() {
         playButton.textContent = "楽曲を一時停止する";
     }
     //createjs.Sound.play("click");
-}
-function stopSound() {
+    }
+    function stopSound() {
     // IDを使って停止します。
     bgmInstance.stop();
     document.js.bpmBox.disabled = "";
     playButton = document.getElementById("playButton").textContent = "楽曲を再生する";
-}
+    }
 
-function playSound(pass, loop_ = 1, pan_ = 0.5) {
+    function playSound(pass, loop_ = 1, pan_ = 0.5) {
     createjs.Sound.createInstance(pass).play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: loop_, pan: pan_ });//playは重
-}
+    }
 
-function ticktack(num) {
+    function ticktack(num) {
     playSound(seList[num]);
-}
+    }
 
 
-function metronome(posit, bpm) {
+    function metronome(posit, bpm) {
     var split = 4;
     var spb = 1 / (bpm / 60) * 1000 * split;
     var bps = (bpm / 60) / 1000 / split;

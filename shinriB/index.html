@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- <link rel="stylesheet" href="css/base.css"> -->
+  <style>
+  </style>
+  <!-- -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
+  <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script src="script.js"></script>
+  <script>
+    
+  </script>
+
+
+</head>
+<body>
+  <p>
+    <h1></h1>
+    <p>
+      bpmを入力するには一度楽曲を停止してください<br>
+      <button id="playButton" onclick="playAndPauseSound()">楽曲を再生する</button>
+      <button onclick="stopSound()">楽曲を停止する</button><br>
+      <form name="js">
+        bpm<input type="text" name="bpmBox" value="120">
+      </form>
+      <span id="bgmBoxEx"></span><br>
+      Instanse:<span id="playingSound">***</span><br>
+      Name:<span id="bgmName">***</span><br>
+      Paused:<span id="bgmPaused">***</span><br>
+      Pos:<span id="bgmPos">***</span><br>
+      <button onclick="ticktack([4])">clap</button><br>
+    </p>
+  </p>
+</body>
+</html>
