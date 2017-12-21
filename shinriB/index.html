@@ -22,6 +22,10 @@
     #display{
       display : inline-block;
     }
+
+    #copywrite{
+      text-align: right;
+    }
   </style>
   <!-- -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
@@ -56,6 +60,7 @@
     </div>
     <div v-show="oppState == 2">
         <div id="display"></div>
+        <div id="copywrite">楽曲提供: 煉獄庭園</div>
         <div v-if="state == 2 || state == 4">
             <iframe v-if="soundDampable == false" src="https://docs.google.com/forms/d/e/1FAIpQLSdnr9y9PSuGEseYUc2QMsoMJPJBXYpz_4YQ9DhzmeUszZfNvg/viewform?embedded=true" width="1000" height="700" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます...</iframe>
             <iframe v-else src="https://docs.google.com/forms/d/e/1FAIpQLSf2vUQDtRknISm9OsBuExF4TmY6xrcNyYbb2MJufLtx0Gftqw/viewform?embedded=true" width="1000" height="700" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます...</iframe>
