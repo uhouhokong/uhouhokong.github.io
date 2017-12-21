@@ -3,7 +3,8 @@ let vm = new Vue({
   data : {
     oppState : 0,
     state : 0,
-    really : true
+    really : true,
+    soundDampable : true
   }
 });
 
@@ -80,7 +81,7 @@ function stateWakeup(){
   case 0://準備
     count = 0;
   case 1://準備
-    soundDampable = oneFirst;//1/2
+    soundDampable = oneFirst;
 
     break;
 
@@ -91,9 +92,12 @@ function stateWakeup(){
   case 3://準備
     soundDampable = !soundDampable;
 
-    playingSound.stop();
-    playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });//
     areas.unshift(new Area(0, 0, width*2, height*2, 1, color(130, 80), "sound_100.mp3", 1));
+    playingSound.stop();
+    playingSound = areas[0].sound;
+    playingRate = areas[0].soundRate;
+    playingSound.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0 });//
+    
     break;
 
   case 4://実験２回目
@@ -106,6 +110,7 @@ function stateWakeup(){
 
   vm.state = state;
   vm.really = really;
+  vm.soundDampable = soundDampable;
 }
 
 var really = false;
@@ -142,7 +147,7 @@ function stateUpdate(){
         fill(130);
         if(really == false){
           reallyTime = 0;
-          text("画面下部のアンケートのお答えください\n画面内をクリックすると 次のステップへと進みます。", width/2, height/8);
+          text("画面下部のアンケートにお答えください\n画面内をクリックすると 次のステップへと進みます。", width/2, height/8);
         }
         else{
           reallyTime++;
@@ -155,24 +160,28 @@ function stateUpdate(){
       break;
   }
 }
+
 function mouseClicked(){
-  if(state == 0 && count > 20){
-    if(areas[areas.length-1].mouseover(mouseX, mouseY))changeState(1);
-  }
-  if(state == 2 || state == 4){
-    if(playingSound.position > 6000 / playingRate){
-      if(really == false){really = true;}
-      else{
-        if(areas[areas.length-1].mouseover(mouseX, mouseY) && reallyTime > 90){
-          changeState(state+1);really=false;
+  switch(state){
+    case 0:
+      if(count > 20 && areas[areas.length-1].mouseover(mouseX, mouseY))changeState(1);
+      break;
+
+    case 2:
+    case 4:
+      if(playingSound.position > 6000 / playingRate){
+        if(really == false){really = true;}
+        else{
+          if(areas[areas.length-1].mouseover(mouseX, mouseY) && reallyTime > 90){
+            changeState(state+1);really=false;
+          }
         }
       }
-      
-    }
-  }
-  if(state == 5){
-    
-    if(areas[areas.length-1].mouseover(mouseX, mouseY))playingSound.paused = !playingSound.paused;
+      break;
+
+    case 5:
+      if(areas[areas.length-1].mouseover(mouseX, mouseY))playingSound.paused = !playingSound.paused;
+      break;
   }
 }
 
@@ -183,6 +192,7 @@ function setup() {
   noCursor();
   
 }
+
 
 let oneFirst;
 window.onload = function () {
@@ -195,9 +205,7 @@ window.onload = function () {
   areas.push(new Area(width*3/4, height/2, width/3, height/2, 3, color(130, 120, 170), "sound_45.mp3", 0.45));
   areas.push(new Area(width/2, height/2, width, height, 1, color(250,250,250), "sound_100.mp3", 1));
 
-  //最初にあれするかを与える
   oneFirst = (Math.random() > 0.5);
-
   changeState(0);//init state
 }
 
