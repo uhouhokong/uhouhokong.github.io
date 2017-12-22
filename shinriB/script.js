@@ -4,7 +4,8 @@ let vm = new Vue({
     oppState : 0,
     state : 0,
     really : true,
-    soundDampable : true
+    soundDampable : true,
+    confirmEnv : false
   }
 });
 

@@ -9,6 +9,18 @@
       visibility : hidden;
     }
 
+    h5{
+      margin-top : 10px;
+      border-left : 3px;
+      border-bottom : 1px;
+      }
+
+    p{
+      margin-left : 16px;
+      border-left : 3px;
+      border-bottom : 1px;
+    }
+
     #app {
       margin-top : 30px;
       padding : 20px 20px;
@@ -17,6 +29,9 @@
 
     .gaming {
       width : 1120px;
+    }
+    .caution {
+      color : red;
     }
     
     #display{
@@ -34,18 +49,31 @@
 <body>
   <div id="app" v-cloak :class="{ gaming : oppState == 2 , container : true}">
     <div v-if="oppState == 0" id="explain">
-      <h1>実験趣旨説明</h1>
-      <h3>ご用意いただきたい環境</h3>
-      <p>ブラウザからの音声が聞ける状態である</p>
-      <p>PCからの実験参加である（スマホ、タブレット等不可)</p>
-      <p>横幅が十分に広いブラウザ（1080p以上)</p>
-      <h3>実験の手順</h3>
+      <h3>実験趣旨説明</h1>
+      <h5>おことわり</h5>
+      <p>この実験は明治大学総合数理学科 心理学 の授業の元で行われ、その結果を授業内で発表します。</p>
+      <p>今回収集した個人情報はこの課題以外のことには利用しません</p>
+      <h5>実験に必要な環境</h5>
+      <p><b>実験は以下の環境で行います。<br>
+        すべての要件を満たし、確認したのち"準備完了"を押してください</b></p>
+      <p>
+        <li>ブラウザからの音声が聞ける状態である</li>
+        <li>PCからの実験参加である（スマホ、タブレット等不可)</li>
+        <li>横幅が十分に広いブラウザ（1080p以上)</li>
+      </p>
+      <a v-if="!confirmEnv" class="waves-effect waves-light btn" @click="confirmEnv = true">準備完了</a>
+      
+      <h5>実験の手順</h5>
       <img src="setsumei.png">
-      <p>実験用の画面では、緑色と紫色の二つの四角形の領域と、赤い点が表示されます。</p>
+      <p>実験が開始すると、上図のような画面に移動します。</p>
       <p>赤い点は、あなたのマウスカーソルであり、自由に動かすことができます。</p>
       <p>緑色の領域と紫色の領域のそれぞれにマウスカーソルを移動させた時に、何らかの変化が生じます。</p>
       <p>その際に感じたことについてアンケートでお答えいただきます。</p>
-      <a class="waves-effect waves-light btn" @click="oppState++">次へ</a>
+        <a v-if="confirmEnv" class="waves-effect waves-light btn" @click="oppState++">次へ</a>
+        <div v-else>
+            <a v-if="confirmEnv" class="waves-effect waves-light btn">次へ</a>
+            <div class="caution">  実験に必要な環境を確認し、承認してください</div>
+        </div>
     </div>
     <div v-else-if="oppState == 1"id="unquate">
       <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdE2eBPvbIpBKR_Dsr3gqpbAEvA86-etsT2fRQ9uKBGanBqrw/viewform?embedded=true" width="700" height="700" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます...</iframe>
