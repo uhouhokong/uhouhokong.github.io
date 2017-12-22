@@ -4,6 +4,8 @@
 "asmCodeUrl": "TestBuild_BG.asm.code.unityweb",
 "asmMemoryUrl": "TestBuild_BG.asm.memory.unityweb",
 "asmFrameworkUrl": "TestBuild_BG.asm.framework.unityweb",
+"graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
 "splashScreenStyle": "Dark",
 "backgroundColor": "#231F20"
 }
