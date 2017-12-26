@@ -154,7 +154,6 @@ function initStage(){//4キャラクタぶんのリズムパターンを渡すx
         
     initPlayers();
     mainMusic = new Music(loadSound("iwashii.wav"), 120);
-    mainMusic.play();
 
     scene = new Scene();
 }

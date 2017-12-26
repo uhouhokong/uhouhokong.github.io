@@ -71,6 +71,9 @@ class PlayScene extends Scene{
     constructor(){
         super();
     }
+    wakeup(){
+        mainMusic.play();
+    }
     update(){
 
     }
