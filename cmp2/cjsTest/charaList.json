@@ -3,23 +3,41 @@
         {
             "id":   0,
             "x":    0.75,
-            "y":    0.75
+            "y":    0.75,
+            "imagesFolder": "images/player0/",
+            "imagesNum": 8
         },
         {
             "id":   1,
             "x":    0.62,
-            "y":    0.44
+            "y":    0.44,
+            "imagesFolder": "images/player1/",
+            "imagesNum": 8
         },
         {
             "id":   2,
-            "x":    0.35,
-            "y":    0.38
+            "x":    0.41,
+            "y":    0.31,
+            "imagesFolder": "images/player2/",
+            "imagesNum": 8
         },
         {
             "id":   3,
             "x":    0.28,
-            "y":    0.62
+            "y":    0.62,
+            "imagesFolder": "images/player3/",
+            "imagesNum": 8
         }
-
-    ]
+    ],
+    "effects": {
+        "white": {
+            "sourse": "images/white.png",
+            "anims": [
+                {
+                    "type":     "FadeOut",
+                    "limit":    10
+                }
+            ]
+        }
+    }
 }
