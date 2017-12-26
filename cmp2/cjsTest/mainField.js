@@ -59,7 +59,9 @@ function loadSerialImages(pass, num, digit = 3, extens = "png"){
     console.log(new createjs.Bitmap("images/player0/005.png"));
     var ret = [];
     for(var i=0; i<num; i++){
-        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
+        let pa = pass + zeroFilled(i, digit) + "." + extens;
+        console.log(pa);
+        ret.push(new createjs.Bitmap(pa).image);
     }
     return ret;
 }
