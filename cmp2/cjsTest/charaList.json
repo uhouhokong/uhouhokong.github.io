@@ -4,34 +4,34 @@
             "id":   0,
             "x":    0.75,
             "y":    0.75,
-            "imagesFolder": "images/player0/",
+            "imagesFolder": "Images/player0/",
             "imagesNum": 8
         },
         {
             "id":   1,
             "x":    0.62,
             "y":    0.44,
-            "imagesFolder": "images/player1/",
+            "imagesFolder": "Images/player1/",
             "imagesNum": 8
         },
         {
             "id":   2,
             "x":    0.41,
             "y":    0.31,
-            "imagesFolder": "images/player2/",
+            "imagesFolder": "Images/player2/",
             "imagesNum": 8
         },
         {
             "id":   3,
             "x":    0.28,
             "y":    0.62,
-            "imagesFolder": "images/player3/",
+            "imagesFolder": "Images/player3/",
             "imagesNum": 8
         }
     ],
     "effects": {
         "white": {
-            "sourse": "images/white.png",
+            "sourse": "Images/white.png",
             "anims": [
                 {
                     "type":     "FadeOut",

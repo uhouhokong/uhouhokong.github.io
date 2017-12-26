@@ -52,21 +52,8 @@ class Player{
 //リソース雛形t
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
-    ret.push(new createjs.Bitmap(pass + "0" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "1" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "2" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "3" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "4" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "5" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "6" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "7" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "8" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "9" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "10" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "11" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "12" + "." + extens).image);
     for(let i=0; i<num; i++){
-        // ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
+        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
 }
@@ -113,7 +100,7 @@ function retDigit(num){
 
 //window.addEventListener("load", init);
 
-var buttonImages = loadSerialImages("images/button/", 3);
+var buttonImages = loadSerialImages("Images/button/", 3);
 
 var seList = [];
 function loadSeList() {
