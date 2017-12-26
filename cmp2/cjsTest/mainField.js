@@ -52,6 +52,19 @@ class Player{
 //リソース雛形t
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
+    ret.push(new createjs.Bitmap(pass + "000" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "001" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "002" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "003" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "004" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "005" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "006" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "007" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "008" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "009" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "010" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "011" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "012" + "." + extens).image);
     for(let i=0; i<num; i++){
         // ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
@@ -188,7 +201,7 @@ function init() {
     loadSeList();
 
     var scoreNum = 0; // スコア
-    setTimeout(initStage(), 5000);
+    initStage();
     //initStage();
     changeScene(new WaitScene());
     setInterval("highUpdate()", 50);
