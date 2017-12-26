@@ -31,7 +31,7 @@ class Player{
         this.x = data.x * STAGE_W;//グローバル変数
         this.y = data.y * STAGE_H;//グローバル変数
         this.images = loadSerialImages(data.imagesFolder, data.imagesNum);
-        this.sprite.image = this.images[0];
+        // this.sprite.image = this.images[0];
         this.sprite.regX = 50;  //this.sprite.image.width/2;
         this.sprite.regY = 180; //this.sprite.image.height;
     }
@@ -43,7 +43,7 @@ class Player{
     }
 
     beating(beat){
-        this.sprite.image = this.images[beat % this.images.length];
+        //this.sprite.image = this.images[beat % this.images.length];
         if(beat % 2 == 0)
         this.sprite.startAnim(new PopAnimation(this.sprite, 8));
     }
@@ -51,18 +51,10 @@ class Player{
 
 //リソース雛形t
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
-    console.log(new createjs.Bitmap("images/player0/000.png"));
-    console.log(new createjs.Bitmap("images/player0/001.png"));
-    console.log(new createjs.Bitmap("images/player0/002.png"));
-    console.log(new createjs.Bitmap("images/player0/003.png"));
-    console.log(new createjs.Bitmap("images/player0/004.png"));
-    console.log(new createjs.Bitmap("images/player0/005.png"));
     var ret = [];
     for(let i=0; i<num; i++){
-        let pa = pass + zeroFilled(0, digit) + "." + extens;
-        console.log("let "+pa);
-        console.log(new createjs.Bitmap(pa));
-        // ret.push(new createjs.Bitmap(pa).image);
+        let pa = pass + zeroFilled(i, digit) + "." + extens;
+        ret.push(new createjs.Bitmap(pa).image);
     }
     return ret;
 }
