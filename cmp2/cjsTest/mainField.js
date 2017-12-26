@@ -51,10 +51,14 @@ class Player{
 
 //リソース雛形t
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
+    console.log(new createjs.Bitmap("images/player0/000.png"));
+    console.log(new createjs.Bitmap("images/player0/001.png"));
+    console.log(new createjs.Bitmap("images/player0/002.png"));
+    console.log(new createjs.Bitmap("images/player0/003.png"));
+    console.log(new createjs.Bitmap("images/player0/004.png"));
+    console.log(new createjs.Bitmap("images/player0/005.png"));
     var ret = [];
     for(var i=0; i<num; i++){
-        console.log(pass + zeroFilled(i, digit) + "." + extens);
-        console.log(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens));
         ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
