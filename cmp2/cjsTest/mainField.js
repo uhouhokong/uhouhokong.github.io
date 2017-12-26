@@ -58,9 +58,9 @@ function loadSerialImages(pass, num, digit = 3, extens = "png"){
     console.log(new createjs.Bitmap("images/player0/004.png"));
     console.log(new createjs.Bitmap("images/player0/005.png"));
     var ret = [];
-    for(var i=0; i<num; i++){
+    for(let i=0; i<num; i++){
         let pa = pass + zeroFilled(0, digit) + "." + extens;
-        console.log("tachikata "+pa);
+        console.log("let "+pa);
         console.log(new createjs.Bitmap(pa));
         // ret.push(new createjs.Bitmap(pa).image);
     }
