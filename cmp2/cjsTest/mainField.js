@@ -31,7 +31,7 @@ class Player{
         this.x = data.x * STAGE_W;//グローバル変数
         this.y = data.y * STAGE_H;//グローバル変数
         this.images = loadSerialImages(data.imagesFolder, data.imagesNum);
-        // this.sprite.image = this.images[0];
+        this.sprite.image = this.images[0];
         this.sprite.regX = 50;  //this.sprite.image.width/2;
         this.sprite.regY = 180; //this.sprite.image.height;
     }
@@ -43,7 +43,7 @@ class Player{
     }
 
     beating(beat){
-        //this.sprite.image = this.images[beat % this.images.length];
+        this.sprite.image = this.images[beat % this.images.length];
         if(beat % 2 == 0)
         this.sprite.startAnim(new PopAnimation(this.sprite, 8));
     }
@@ -53,11 +53,7 @@ class Player{
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
     for(let i=0; i<num; i++){
-        let pa = pass + String(zeroFilled(i, digit)) + "." + extens;
-        // console.log(new createjs.Bitmap(pass + "000" + "." + extens));
-        // console.log("おい！！！！！！！！！"+new createjs.Bitmap(+pass + "00"+ i + "." + extens));
-        // console.log("おえ"+new createjs.Bitmap(+pass + "00"+ String(i) + "." + extens));
-        ret.push(new createjs.Bitmap(pa).image);
+        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
 }
@@ -192,7 +188,8 @@ function init() {
     loadSeList();
 
     var scoreNum = 0; // スコア
-    initStage();
+    setTimeout(initStage(), 5000);
+    //initStage();
     changeScene(new WaitScene());
     setInterval("highUpdate()", 50);
 
