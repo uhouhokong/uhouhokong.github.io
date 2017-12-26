@@ -53,7 +53,7 @@ class Player{
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
     for(var i=0; i<num; i++){
-        console.log(zeroFilled(i, digit));
+        console.log(pass + zeroFilled(i, digit) + "." + extens);
         ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
@@ -214,9 +214,9 @@ function init() {
     function handleUpdate() {      
         scene.update();
         for(player of players)player.draw();
-        buttonDraw();
 
         effectManager.draw();
+        buttonDraw();
             
         // 自機をマウス座標まで移動させる(減速で移動)
         // player.x += (stage.mouseX - player.x) * 0.1;
