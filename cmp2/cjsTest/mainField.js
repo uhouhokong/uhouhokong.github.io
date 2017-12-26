@@ -53,7 +53,7 @@ class Player{
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
     for(let i=0; i<num; i++){
-        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
+        // ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
 }
