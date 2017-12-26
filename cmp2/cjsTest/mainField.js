@@ -52,19 +52,19 @@ class Player{
 //リソース雛形t
 function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
-    ret.push(new createjs.Bitmap(pass + "000" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "001" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "002" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "003" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "004" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "005" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "006" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "007" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "008" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "009" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "010" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "011" + "." + extens).image);
-    ret.push(new createjs.Bitmap(pass + "012" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "0" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "1" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "2" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "3" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "4" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "5" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "6" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "7" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "8" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "9" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "10" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "11" + "." + extens).image);
+    ret.push(new createjs.Bitmap(pass + "12" + "." + extens).image);
     for(let i=0; i<num; i++){
         // ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
