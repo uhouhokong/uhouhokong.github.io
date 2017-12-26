@@ -180,8 +180,10 @@ class FlashAnimation extends Animation{
 //------------------------------------------------------------------------------------------------
 
 class EffectManager{
-    constructor(data){
+    constructor(){
         this.effects = [];
+    }
+    init(data){
         this.data = data;
         console.log(data);
     }

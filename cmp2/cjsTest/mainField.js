@@ -54,6 +54,7 @@ function loadSerialImages(pass, num, digit = 3, extens = "png"){
     var ret = [];
     for(var i=0; i<num; i++){
         console.log(pass + zeroFilled(i, digit) + "." + extens);
+        console.log(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens));
         ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
     }
     return ret;
@@ -126,9 +127,10 @@ var STAGE_H;
 var background;
 
 function initStage(){//4キャラクタぶんのリズムパターンを渡すx
+    effectManager = new EffectManager();
     $(function() {//jsonからいろいろと初期化
         $.getJSON("charaList.json" , function(data) {
-            effectManager = new EffectManager(data.effects);
+            effectManager.init(data.effects);
         });
     });
     stage = new createjs.Stage("mainField");
