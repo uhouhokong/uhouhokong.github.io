@@ -1,105 +1,3 @@
-//utility
-var onServerVersion = true;
-
-//----------------------------------------------------------------------
-//                              クラス設計
-//----------------------------------------------------------------------
-
-//プレイヤー
-class Player{
-    // if(!(this instanceof Player)) return new Player();// new のつけ忘れ時の不具合を矯正
-
-    //コンストラクタ
-    constructor(playable){
-        //システム的状態
-        this.playable = playable; //
-        this.id = 0;
-        this.state = 0;
-        this.input =   [[0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0],
-                        [0,0,1,1,0,0,1,0,0,1,0,0,0,0,1,1],
-                        [0,0,1,0,0,0,1,1]];
-        //リソース
-        this.images = [];
-        this.sounds = [];
-
-        //描画関係
-
-        this.sprite = new Sprite(stage, new createjs.Bitmap());
-    }
-    init(data){//jsonオブジェクトからいろいろと初期設定
-        this.id = data.id;
-        this.x = data.x * STAGE_W;//グローバル変数
-        this.y = data.y * STAGE_H;//グローバル変数
-        this.images = loadSerialImages(data.imagesFolder, data.imagesNum);
-        this.sprite.image = this.images[0];
-        this.sprite.regX = 50;  //this.sprite.image.width/2;
-        this.sprite.regY = 180; //this.sprite.image.height;
-    }
-    get x() {return this.sprite.x;}             set x(val) {    this.sprite.x = val;}
-    get y() {return this.sprite.y;}             set y(val) {    this.sprite.y = val;}
-
-    draw(){
-        this.sprite.draw();
-    }
-
-    beating(beat){
-        this.sprite.image = this.images[beat % this.images.length];
-        if(beat % 2 == 0)
-        this.sprite.startAnim(new PopAnimation(this.sprite, 8));
-    }
-}
-
-//リソース雛形t
-function loadSerialImages(pass, num, digit = 3, extens = "png"){
-    var ret = [];
-    for(let i=0; i<num; i++){
-        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
-    }
-    return ret;
-}
-function zeroFilled(num, digit){
-    var text ="";
-    for(var i=0; i<digit - retDigit(num);i++)text = text+"0";
-    return text+num;
-}
-function retDigit(num){
-    var digit = 1;
-    var _num = num;
-    while(_num/10 >= 1){
-        digit++;
-        _num = _num/10;
-    }
-    return digit;
-}
-
-
-//----------------------------------------------------------------------
-//                          クラス設計おわり
-//----------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//window.addEventListener("load", init);
-
 var buttonImages = loadSerialImages("Images/button/", 3);
 
 var seList = [];
@@ -109,6 +7,8 @@ function loadSeList() {
     seList.push("SE/clock03.wav");
     seList.push("SE/clock04.wav");
     seList.push("SE/gun30_r.wav");
+    seList.push("SE/kan05.wav");
+    seList.push("SE/kachi28.wav");
     for (var i = 0; i < seList.length; i++) {
         createjs.Sound.registerSound(seList[i]);
     }
@@ -159,11 +59,15 @@ function initPlayers(){
             }
         });
     });
+
+    //dbのデータをここでインプットする
+    // for(p of players){
+    //     players.input();
+    // }
 }
 
 function highUpdate() {
     scene.highUpdate();
-    metronomo();
     mainMusic.highUpdate();
     audioStateDisplay();
 }
@@ -176,8 +80,8 @@ var termLen = [[A_BAR*2], [A_BAR*2], [A_BAR]];
 
 var mainMusic;
 
-function beating(beat){
-    for(player of players)player.beating(beat);
+function beating(beat, clicked){
+    for(player of players)player.beating(beat, clicked);
 }
 
 
@@ -189,7 +93,7 @@ function init() {
     var scoreNum = 0; // スコア
     initStage();
     //initStage();
-    changeScene(new WaitScene());
+    changeScene(new CautionScene());
     setInterval("highUpdate()", 50);
 
     // スコア欄を作成
@@ -199,18 +103,24 @@ function init() {
     if (createjs.Touch.isSupported()) {
         createjs.Touch.enable(stage);
     }
-    // マウスイベントの登録
+    
+    //イベントの登録
     stage.addEventListener("click", handleClick);
-    // tick イベントの登録
+    window.addEventListener("keydown", handleKeyDown);
     createjs.Ticker.setFPS(40);
     createjs.Ticker.addEventListener("tick", handleUpdate);
 
-    // クリックした時の処理
     function handleClick(event) {
         scene.click();
     }
 
-    // tick イベントの処理
+    function handleKeyDown(event) {
+        var keyCode = event.keyCode;
+        if (keyCode == 16) { // シフトキー
+            scene.click();
+        }
+     }
+
     function handleUpdate() {      
         scene.update();
         for(player of players)player.draw();
@@ -230,6 +140,7 @@ function init() {
         alert("ゲームオーバー！ あなたのスコアは " + scoreNum + " でした。");
         // 各種イベントをまとめて解除
         createjs.Ticker.removeAllEventListeners();
+        window.removeAllEventListeners();
         stage.removeAllEventListeners();
     }
 }
@@ -251,47 +162,119 @@ function loadSound(name){
 
 //楽曲 とされるハイコンテキストな集合体
 class Music{
-    constructor(audio, bpm = 120){
+    constructor(audio, bpm = 120, endTerm = 1){
         //楽曲のユニーク値、一度生成されたのち固定である
         this.audio = audio;
         this.bpm = bpm;         //1beat = 4分音譜一つ
         this.measure4 = 4;      //一小節の拍子数。4分の...で記述
         this.termSplit = 8;     //一小節の区切り数
-        this.terms = [2,2,1];   //〜の設定
+        this.terms = [2,2,2,2];   //〜の設定
+        this.surplusDetection = 0.3; // 定数。余剰判定
+        this.offset = 0.05;
         //状態
         this.prePosit = 0;
         this.preBeat = 0;
         this.playOrdered = false;
 
-        this.term = 0;
+        this.clickTrigger = false;
+        this.preClickTrigger = false;
+        
+        this._startTerm = 0;
+        this._endTerm = 1;
+        this.startTerm = 0;
+        this.endTerm = endTerm;
+        console.log("sT: "+this.startTerm+", eT: "+ this.endTerm);
     }
+    get startTerm(){return this._startTerm;}
+    set startTerm(value){
+        this._startTerm = Math.max(0 , Math.min(value, this.terms.length));
+        this.endTerm = this._endTerm;
+    }
+    get endTerm(){return this._endTerm;}
+    set endTerm(value){this._endTerm = Math.max(this.startTerm + 1, Math.min(value, this.terms.length + 1));}
 
     //小節ループ、判定など高解像度でやった方が良いもの
     highUpdate(){
         if(this.playOrdered != this.played)this.play();
-
+        this.metronome();
         this.prePosit = this.audio.position;
         this.preBeat = this.beat;
+    }
+    metronome() {
+        var pre = (this.preBeat+this.offset) - this.termToBeat(this.term);
+        var cur = (this.beat+this.offset) - this.termToBeat(this.term);
+        if(Math.floor(pre)!=Math.floor(cur)){
+            if(this.clickTrigger){
+                ticktack(0);
+                this.preClickTrigger = true;
+            }
+            beating(Math.floor(cur), this.clickTrigger);
+            if(this.term(cur) >= this.endTerm){
+                // console.log("nextTerm:"+this.termToBeat(this.startTerm) + "sT: "+this._startTerm+", eT: "+ this._endTerm);
+                this.audio.position = this.beatToPosit(this.termToBeat(this.startTerm));
+            }
+            this.clickTrigger = false;
+        }
+        if(cur % 1 > this.surplusDetection){
+            this.preClickTrigger = false;
+        }
+    }
+    changeTerm(){
+        this.audio.position = this.beatToPosit(this.termToBeat(this.startTerm) + this.beat - this.termToBeat(this.term));
+    }
+    click(){
+        var cur = this.beat+this.offset;
+        if(cur % 1 < this.surplusDetection){
+            if(!this.preClickTrigger){
+                ticktack(0);
+                beating(Math.floor(cur), true);
+            }
+            this.preClickTrigger = true;
+        }else{
+            this.clickTrigger = true;
+        }
     }
 
     get played(){
         return !(this.audio.paused || this.audio.position == 0);
     }
 
+    get len(){return this.terms.length;}
     get beat(){
         var split = this.measure4 / this.termSplit;
         var spb = 1 / (this.bpm / 60) * 1000 * split;
-        var bps = (this.bpm / 60) / 1000 / split;
         var beat = this.audio.position / spb;
         return beat;
     }
-    // get term(){
-    //     return 1;
-    // }
+    term(){
+        return this.term(this.beat);
+    }
+    term(beat){
+        var term=0;
+        for(; term<this.terms.length; term++){
+            if(beat < this.terms[term]*this.termSplit)return term;
+            else beat -= this.terms[term]*this.termSplit;
+        }
+        // console.log("beat error: ターム指定外");
+        return this.terms.length;
+    }
+    termToBeat(term){
+        var len = 0;
+        for(let i=0; i<term; i++){
+            len += this.terms[i]*this.termSplit;
+        }
+        return len;
+    }
+    beatToPosit(beat){
+        var split = this.measure4 / this.termSplit;
+        var spb = 1 / (this.bpm / 60) * 1000 * split;
+        var posit = beat * spb;
+        return posit;
+    }
 
-    play(){
+    play(posit = 0){
         this.preBeat = -0.5;
-        this.audio.play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, pan: 0.5 });
+        this.audio.play({ interrupt: createjs.Sound.INTERRUPT_ANY,position: posit, loop: -1, pan: 0 });
         this.playOrdered = true;
     }
     stop(){
@@ -357,22 +340,12 @@ function stopSound() {
     playButton = document.getElementById("playButton").textContent = "楽曲を再生する";
 }
 
-function playSound(pass, loop_ = 0, pan_ = 0.5) {
+function playSound(pass, loop_ = 0, pan_ = 0) {
     createjs.Sound.createInstance(pass).play({ interrupt: createjs.Sound.INTERRUPT_ANY, loop: loop_, pan: pan_ });//playは重
 }
 
 function ticktack(num) {
     playSound(seList[num]);
-}
-
-function metronomo() {
-    var music = mainMusic;
-    var pre = music.preBeat+0.07;
-    var cur = music.beat+0.07;
-    if(Math.floor(pre)!=Math.floor(cur)){
-        ticktack(0);
-        beating(Math.floor(cur));
-    }
 }
 
 function metronome(posit, bpm) {

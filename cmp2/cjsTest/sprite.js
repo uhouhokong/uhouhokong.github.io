@@ -1,3 +1,25 @@
+function loadSerialImages(pass, num, digit = 3, extens = "png"){
+    var ret = [];
+    for(let i=0; i<num; i++){
+        ret.push(new createjs.Bitmap(pass + zeroFilled(i, digit) + "." + extens).image);
+    }
+    return ret;
+}
+function zeroFilled(num, digit){
+    var text ="";
+    for(var i=0; i<digit - retDigit(num);i++)text = text+"0";
+    return text+num;
+}
+function retDigit(num){
+    var digit = 1;
+    var _num = num;
+    while(_num/10 >= 1){
+        digit++;
+        _num = _num/10;
+    }
+    return digit;
+}
+
 //------------------------------------------------------------------------------------------------
 //    Spriteクラス
 //------------------------------------------------------------------------------------------------
@@ -130,10 +152,10 @@ class MoveFromAnimation extends Animation{
 
 class PopAnimation extends Animation{
     //drawの前でインスタンス化することを想定
-    constructor(sprite, frameLimit, finishable = true, direction = 1){
+    constructor(sprite, frameLimit, finishable = true, rate = 1){
         super(sprite, frameLimit, finishable);
-        this.startScaleX = 0.13;
-        this.startScaleY = 0.08;
+        this.startScaleX = 0.13 * rate;
+        this.startScaleY = 0.08 * rate;
     }
     draw(){//最後
         if(this.destroyed)return true;

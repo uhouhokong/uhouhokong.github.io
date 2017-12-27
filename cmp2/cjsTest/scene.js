@@ -21,7 +21,7 @@ class Scene{//abstruct
     end(){}
 }
 
-class WaitScene extends Scene{
+class CautionScene extends Scene{
     constructor(){
         super();
         this.state = 0;
@@ -32,10 +32,55 @@ class WaitScene extends Scene{
         this.bg.alpha = 0.7;
         stage.addChild(this.bg);
 
-        this.t = new createjs.Text("Hello World!", "24px sans-serif", "#FFFFFF");
+        this.t = new createjs.Text("Hello World!", "30px sans-serif", "#FFFFFF");
         this.t.x = STAGE_W/2;
         this.t.y = STAGE_H/2;
         this.t.text = "このページは\"音\"を出して遊びます\n十分に音を鳴らせる環境をご用意ください";
+        this.t.textAlign = "center";
+        this.t.textBaseline = "middle";
+        stage.addChild(this.t);
+
+        this.buttons = [];
+        this.buttons.push(new Button("確 認", STAGE_W/2, STAGE_H*15/18, this.toWait.bind(this)));
+    }
+    update(){
+        super.update();
+        if(this.state == 1 && this.frameCont - this.timeMarker > 20)changeScene(new WaitScene());
+    }
+    click(){
+        
+    }
+    toWait(){
+        this.state = 1;
+        this.timeMarker = this.frameCont;
+    }
+
+    highUpdate(){
+
+    }
+    end(){
+        this.buttons[0].destroy();
+        stage.removeChild(this.bg);
+        stage.removeChild(this.t);
+    }
+}
+
+class WaitScene extends Scene{
+    constructor(){
+        super();
+        this.state = 0;
+        mainMusic.play();
+    }
+    wakeup(){
+        this.bg = new createjs.Shape();
+        this.bg.graphics.beginFill("black").drawRect(0, 0, STAGE_W, STAGE_H);
+        this.bg.alpha = 0.7;
+        stage.addChild(this.bg);
+
+        this.t = new createjs.Text("Hello World!", "24px sans-serif", "#FFFFFF");
+        this.t.x = STAGE_W/2;
+        this.t.y = STAGE_H/2;
+        this.t.text = "";
         this.t.textAlign = "center";
         this.t.textBaseline = "middle";
         stage.addChild(this.t);
@@ -72,13 +117,15 @@ class PlayScene extends Scene{
         super();
     }
     wakeup(){
-        mainMusic.play();
+        mainMusic.startTerm++;
+        mainMusic.changeTerm();
     }
     update(){
-
+        
     }
     click(){
-
+        mainMusic.click();
+        //mainMusic.startTerm = mainMusic.startTerm + 1;
     }
     highUpdate(){
 
@@ -157,16 +204,19 @@ class Button{
                 break;
             }
         }
+        this.cont.removeAllEventListeners();
     }
     click(){
-        console.log("a");
+        ticktack(5);
         if(typeof this.callback == 'function')this.callback();
         this.sprites[1].startAnim(new MoveFromAnimation(this.sprites[1], 12, false, 1, -10, 4, 50, -20));
         this.sprites[2].startAnim(new MoveFromAnimation(this.sprites[2], 12, false, 1, 10, -4, -50, 20));
         this.sprites[1].startAnim(new FlashAnimation(this.sprites[1], 12, false));
         this.sprites[2].startAnim(new FlashAnimation(this.sprites[2], 12, false));
+        this.sprites[0].bitmap.mouseEnabled = false;
     }
     mouseOver() {
+        ticktack(6);
         this.expand = [];
         // this.expand.push(this.sprites[1].startAnim(new PopAnimation(this.sprites[1], 8, false)));
         this.expand.push(this.sprites[1].startAnim(new MoveToAnimation(this.sprites[1], 8, false, 1, -10, 4)));
