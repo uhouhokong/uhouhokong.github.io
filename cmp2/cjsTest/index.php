@@ -57,6 +57,25 @@
         <input type = "submit" class = "button" value = "play" >
     </div>
     
+    <?php 
+          if(isset($_GET["playerA"]) && isset($_GET["playerB"]) && isset($_GET["playerC"]) && isset($_GET["playerD"])){
+            $playerA = $_GET["playerA"];
+            $playerB = $_GET["playerB"];
+            $playerC = $_GET["playerC"];
+            $playerD = $_GET["playerD"];
+            $count =0;
+            if($playerA == "you")$count++;
+            if($playerB == "you")$count++;
+            if($playerC == "you")$count++;
+            if($playerD == "you")$count++;
+    
+            if($count == 1){
+              header("Location: test.php");
+              exit;
+            }
+          }
+          
+        ?>
   </p>
 
   <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
