@@ -40,7 +40,7 @@ function initStage(){//4キャラクタぶんのリズムパターンを渡すx
     background = new Sprite(stage, "Images/rafu.png");
         
     initPlayers();
-    mainMusic = new Music(loadSound("iwashii.wav"), 120);
+    mainMusic = new Music(loadSound("nJ.wav"), 128);
 
     scene = new Scene();
 }
