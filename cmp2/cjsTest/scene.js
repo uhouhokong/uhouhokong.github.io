@@ -13,7 +13,7 @@ class Scene{//abstruct
     }
     wakeup(){}
     update(){this.frameCont++;}
-    click(){
+    click(keyCode){
         //stage.setChildIndex(background.bitmap, (stage.getNumChildren())-1); //深度変更
         //effectManager.play("white", 0,0);
     }
@@ -47,7 +47,7 @@ class CautionScene extends Scene{
         super.update();
         if(this.state == 1 && this.frameCont - this.timeMarker > 20)changeScene(new WaitScene());
     }
-    click(){
+    click(keyCode){
         
     }
     toWait(){
@@ -93,7 +93,7 @@ class WaitScene extends Scene{
         super.update();
         if(this.state == 1 && this.frameCont - this.timeMarker > 20)changeScene(new PlayScene());
     }
-    click(){
+    click(keyCode){
         
     }
     toPlay(){
@@ -123,9 +123,14 @@ class PlayScene extends Scene{
     update(){
         
     }
-    click(){
-        mainMusic.click();
-        //mainMusic.startTerm = mainMusic.startTerm + 1;
+    click(keyCode){
+        
+        if (keyCode == 16 || keyCode == -1) { // シフトキー/ クリック
+            mainMusic.click();
+        }
+        else if (keyCode == 32) { // スペースキー
+            mainMusic.startTerm = mainMusic.startTerm + 1;
+        }
     }
     highUpdate(){
 
