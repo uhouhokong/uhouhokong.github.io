@@ -80,12 +80,8 @@ var termLen = [[A_BAR*2], [A_BAR*2], [A_BAR]];
 
 var mainMusic;
 
-function beating(term, beat, clicked){
-    for(player of players)player.beating(term, beat, clicked);
-}
-
-function beyondTerm(preTerm, term){
-    for(player of players)player.beyondTerm(preTerm, term);
+function beating(beat, clicked){
+    for(player of players)player.beating(beat, clicked);
 }
 
 
@@ -115,12 +111,14 @@ function init() {
     createjs.Ticker.addEventListener("tick", handleUpdate);
 
     function handleClick(event) {
-        scene.click(-1);
+        scene.click();
     }
 
     function handleKeyDown(event) {
         var keyCode = event.keyCode;
-        scene.click(event.keyCode);
+        if (keyCode == 16) { // シフトキー
+            scene.click();
+        }
      }
 
     function handleUpdate() {      
@@ -151,6 +149,139 @@ function init() {
 
 //音楽に関する事
 
+var registedSounds = [];
+
+//同一名のものは一度だけレジスタに登録し、インスタンスを返す
+function loadSound(name){
+    if(registedSounds.indexOf(name) == -1){
+        createjs.Sound.registerSound(name);
+        registedSounds.push(name);
+    }
+    return createjs.Sound.createInstance(name);
+}
+
+//楽曲 とされるハイコンテキストな集合体
+class Music{
+    constructor(audio, bpm = 120, endTerm = 1){
+        //楽曲のユニーク値、一度生成されたのち固定である
+        this.audio = audio;
+        this.bpm = bpm;         //1beat = 4分音譜一つ
+        this.measure4 = 4;      //一小節の拍子数。4分の...で記述
+        this.termSplit = 8;     //一小節の区切り数
+        this.terms = [2,2,2,2];   //〜の設定
+        this.surplusDetection = 0.3; // 定数。余剰判定
+        this.offset = 0.05;
+        //状態
+        this.prePosit = 0;
+        this.preBeat = 0;
+        this.playOrdered = false;
+
+        this.clickTrigger = false;
+        this.preClickTrigger = false;
+        
+        this._startTerm = 0;
+        this._endTerm = 1;
+        this.startTerm = 0;
+        this.endTerm = endTerm;
+        console.log("sT: "+this.startTerm+", eT: "+ this.endTerm);
+    }
+    get startTerm(){return this._startTerm;}
+    set startTerm(value){
+        this._startTerm = Math.max(0 , Math.min(value, this.terms.length));
+        this.endTerm = this._endTerm;
+    }
+    get endTerm(){return this._endTerm;}
+    set endTerm(value){this._endTerm = Math.max(this.startTerm + 1, Math.min(value, this.terms.length + 1));}
+
+    //小節ループ、判定など高解像度でやった方が良いもの
+    highUpdate(){
+        if(this.playOrdered != this.played)this.play();
+        this.metronome();
+        this.prePosit = this.audio.position;
+        this.preBeat = this.beat;
+    }
+    metronome() {
+        var pre = (this.preBeat+this.offset) - this.termToBeat(this.term);
+        var cur = (this.beat+this.offset) - this.termToBeat(this.term);
+        if(Math.floor(pre)!=Math.floor(cur)){
+            if(this.clickTrigger){
+                ticktack(0);
+                this.preClickTrigger = true;
+            }
+            beating(Math.floor(cur), this.clickTrigger);
+            if(this.term(cur) >= this.endTerm){
+                // console.log("nextTerm:"+this.termToBeat(this.startTerm) + "sT: "+this._startTerm+", eT: "+ this._endTerm);
+                this.audio.position = this.beatToPosit(this.termToBeat(this.startTerm));
+            }
+            this.clickTrigger = false;
+        }
+        if(cur % 1 > this.surplusDetection){
+            this.preClickTrigger = false;
+        }
+    }
+    changeTerm(){
+        this.audio.position = this.beatToPosit(this.termToBeat(this.startTerm) + this.beat - this.termToBeat(this.term));
+    }
+    click(){
+        var cur = this.beat+this.offset;
+        if(cur % 1 < this.surplusDetection){
+            if(!this.preClickTrigger){
+                ticktack(0);
+                beating(Math.floor(cur), true);
+            }
+            this.preClickTrigger = true;
+        }else{
+            this.clickTrigger = true;
+        }
+    }
+
+    get played(){
+        return !(this.audio.paused || this.audio.position == 0);
+    }
+
+    get len(){return this.terms.length;}
+    get beat(){
+        var split = this.measure4 / this.termSplit;
+        var spb = 1 / (this.bpm / 60) * 1000 * split;
+        var beat = this.audio.position / spb;
+        return beat;
+    }
+    term(){
+        return this.term(this.beat);
+    }
+    term(beat){
+        var term=0;
+        for(; term<this.terms.length; term++){
+            if(beat < this.terms[term]*this.termSplit)return term;
+            else beat -= this.terms[term]*this.termSplit;
+        }
+        // console.log("beat error: ターム指定外");
+        return this.terms.length;
+    }
+    termToBeat(term){
+        var len = 0;
+        for(let i=0; i<term; i++){
+            len += this.terms[i]*this.termSplit;
+        }
+        return len;
+    }
+    beatToPosit(beat){
+        var split = this.measure4 / this.termSplit;
+        var spb = 1 / (this.bpm / 60) * 1000 * split;
+        var posit = beat * spb;
+        return posit;
+    }
+
+    play(posit = 0){
+        this.preBeat = -0.5;
+        this.audio.play({ interrupt: createjs.Sound.INTERRUPT_ANY,position: posit, loop: -1, pan: 0 });
+        this.playOrdered = true;
+    }
+    stop(){
+        this.audio.stop();
+        this.playOrdered = false;
+    }
+}
 
 
 var bgmInstance = null;
