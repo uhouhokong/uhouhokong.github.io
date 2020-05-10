@@ -1,3 +1,5 @@
+//https://editor.p5js.org/
+//
 let stage;
 
 class Stage {
@@ -214,7 +216,7 @@ class Stage {
       let gained = false;
       for (let j = 0; j < this.players.length; j++) {
         if (this.players[j].x != moneys[i].x || this.players[j].y != moneys[i].y) continue;
-        this.players[j].gainMoney(moneys[i].mass);
+        this.players[j].gainMoney(int(moneys[i].mass));
         gainedMoney.push(moneys[i]);
         gained = true;
         break;
@@ -241,15 +243,15 @@ class Stage {
       if (aimedPlayer.length == 0) continue;
       if (aimedPlayer.length == 1) {
         if (moneys[i].mass > 20) {
-          this.players[j].gainMoney(moneys[i].mass / 2);
-          moneys[i].mass /= 2;
+          this.players[j].gainMoney(int(moneys[i].mass / 2));
+          moneys[i].mass -= int(moneys[i].mass / 2);
         } else {
-          this.players[j].gainMoney(moneys[i].mass);
+          this.players[j].gainMoney(int(moneys[i].mass));
           gainedMoney.push(moneys[i]);
         }
       } else {
         for (let j = 0; j < aimedPlayer.length; j++) {
-          this.players[aimedPlayer[j]].gainMoney(moneys[i].mass / aimedPlayer.length);
+          this.players[aimedPlayer[j]].gainMoney(int(moneys[i].mass / aimedPlayer.length));
         }
         gainedMoney.push(moneys[i]);
       }
