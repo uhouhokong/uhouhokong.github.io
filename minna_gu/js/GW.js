@@ -243,10 +243,10 @@ class Stage {
       if (aimedPlayer.length == 0) continue;
       if (aimedPlayer.length == 1) {
         if (moneys[i].mass > 20) {
-          this.players[j].gainMoney(int(moneys[i].mass / 2));
+          this.players[aimedPlayer[0]].gainMoney(int(moneys[i].mass / 2));
           moneys[i].mass -= int(moneys[i].mass / 2);
         } else {
-          this.players[j].gainMoney(int(moneys[i].mass));
+          this.players[aimedPlayer[0]].gainMoney(int(moneys[i].mass));
           gainedMoney.push(moneys[i]);
         }
       } else {
@@ -274,7 +274,7 @@ class Stage {
     for (let i = 0; i < this.objects.length; i++) {
       if (this.objects[i].constructor === Wall) walls.push(this.objects[i]);
     }
-    if(moneys.length < 3){
+    if(moneys.length + walls.length < 4){
       if(random() > 0.5){
         //出現可能位置の探索
         let sponablePlaces = [];
@@ -302,7 +302,10 @@ class Stage {
           let pos = sponablePlaces[idx];
           print("マネーリスポン :"+pos[0]+", "+pos[1]);
           if(random() > 0.6){
+            if(moneys.length<3)
             this.objects.push(new Money(this, pos[0], pos[1], 60 + 20*int(random(-1,3))));
+            else if(walls.length<1)
+            this.objects.push(new Wall(this, pos[0], pos[1], 3, 100 + 60*int(random(-1,2))));
           }else{
             if(walls.length<2)
             this.objects.push(new Wall(this, pos[0], pos[1], 3, 100 + 60*int(random(-1,2))));
@@ -520,7 +523,7 @@ class Player {
 
   __displayControler() {
     let x = 20 + (width - 40) / 4 * this.id;
-    let y = height / 2 + 20;
+    let y = height / 4 + 20;
     fill(this.myColor);
     strokeWeight(1);
     textAlign(LEFT, TOP);
@@ -530,7 +533,7 @@ class Player {
       "", x, y);
 
     x += (width - 40) / 8;
-    y = height - (width - 40) / 8 - 20;
+    y = height/2 - (width - 40) / 8 - 20;
     fill(220);
     ellipse(x, y, (width - 40) / 6, (width - 40) / 6);
     if (this.command != -1) {
@@ -644,9 +647,21 @@ class Wall extends Objects {
 
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(400, 800);
   stage = new Stage();
   kc = new KBController(stage);
+  buttons = [];
+  buttons.push(new Button(100, 600, 60, color(255, 160, 160)));
+  buttons.push(new Button(300-20, 600 - 70, 30, color(160)));
+  buttons.push(new Button(300-20 + 70, 600, 30, color(160)));
+  buttons.push(new Button(300-20, 600 + 70, 30, color(160)));
+  buttons.push(new Button(300-20 - 70, 600, 30, color(160)));
+  
+  buttons.push(new Button(300-20 , 600, 30, color(200,160,200)));
+  
+  
+  buttons.push(new Button(140    , 600-120, 30, color(180,160,230)));
+  buttons.push(new Button(300-20+ 70, 600-120, 30, color(100)));
 }
 
 function draw() {
@@ -656,10 +671,32 @@ function draw() {
 
 
   stage.display();
+  for(let i=0; i<buttons.length; i++)buttons[i].display();
   kc.display();
 }
 
-
+function mousePressed() {
+  
+  for(let i=0; i<buttons.length; i++){
+    if(!buttons[i].isPressed(mouseX, mouseY))continue;
+    
+    switch(i){
+      case 0:
+        stage.step();
+        break;
+      case 1:case 2:case 3:case 4:case 5:
+        kc.input(i-1);
+        break;
+      case 6:
+        kc.input(-2);
+        break;
+      case 7:
+        kc.input(-1);
+        break;
+    }
+  }
+  
+}
 
 function keyPressed() {
   switch (keyCode) {
@@ -683,8 +720,27 @@ function keyPressed() {
   if (arrow != null) kc.input(arrow);
 }
 
+class Button {
 
-
+  constructor(x,y,size,color){
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color
+  }
+  
+  display(){
+    fill(this.color);
+    stroke(150);
+    ellipse(this.x, this.y, this.size*2, this.size*2);
+  }
+  
+  isPressed(x, y){
+    return dist(x,y,this.x, this.y) < this.size;
+    
+  }
+  
+}
 class KBController {
   constructor(stage) {
     this.stage = stage;
@@ -724,7 +780,7 @@ class KBController {
 
     x = 20 + (width - 40) / 4 * this.cursol;
     x += (width - 40) / 8;
-    y = height - (width - 40) / 8 - 20;
+    y = height/2 - (width - 40) / 8 - 20;
     fill(p.myColor);
     ellipse(x, y, (width - 40) / 6, (width - 40) / 6);
 
