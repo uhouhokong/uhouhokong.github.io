@@ -27,8 +27,9 @@ class Stage {
     this.players.push(new Player(this, 3, 4, 0, 2));
 
     this.objects = [];
+    this.objects.push(new Money(this, 2, 1, 60));
     this.objects.push(new Money(this, 3, 2, 60));
-    this.objects.push(new Money(this, 0, 1, 60));
+    this.objects.push(new Money(this, 1, 1, 60));
     this.objects.push(new Wall(this, 2, 2, 3, 100));
     this.objects.push(new Wall(this, 5, 1, 3, 100));
 
@@ -55,7 +56,7 @@ class Stage {
 
 
     for (let i = 0; i < this.players.length; i++) this.players[i].command = -1;
-    //kc.init();
+    kc.init();
   }
 
 
@@ -63,7 +64,7 @@ class Stage {
 
   //その他
 
-
+  
   //移動可能かどうかの判定など
   __playerMove() {
     let next = [];
@@ -80,26 +81,26 @@ class Stage {
         next[i] = [this.players[i].x, this.players[i].y];
         type[i] = 2; //壁衝突
       }
-      for (let j = 0; j < this.objects.length; j++) {
+      for(let j=0; j<this.objects.length; j++){
         let o = this.objects[j];
-        if (o.movable) continue;
-        if ((next[i][0] != o.x) || (next[i][1] != o.y)) continue;
+        if(o.movable)continue;
+        if ((next[i][0] != o.x) || (next[i][1] != o.y))continue;
         next[i] = [this.players[i].x, this.players[i].y];
         type[i] = 2; //壁衝突
-
-        if (o.constructor === Wall) o.hit();
+        
+        if(o.constructor === Wall)o.hit();
       }
     }
-
+    
     //wall の終了処理
     let walls = [];
     let brokenWall = [];
     for (let i = 0; i < this.objects.length; i++) {
       if (this.objects[i].constructor === Wall) walls.push(this.objects[i]);
     }
-
+    
     for (let i = 0; i < walls.length; i++) {
-      if (walls[i].hp > 0) continue;
+      if (walls[i].hp>0) continue;
       brokenWall.push(walls[i]);
     }
     //リストから削除してゲーム中から完全に退場
@@ -112,7 +113,7 @@ class Stage {
       this.objects.splice(idx, 1);
       this.objects.push(new Money(this, w.x, w.y, w.mass));
     }
-
+    
 
     //プレイヤー間の衝突判定
 
@@ -264,7 +265,7 @@ class Stage {
       }
       this.objects.splice(idx, 1);
     }
-
+    
     moneys = [];
     for (let i = 0; i < this.objects.length; i++) {
       if (this.objects[i].constructor === Money) moneys.push(this.objects[i]);
@@ -273,72 +274,47 @@ class Stage {
     for (let i = 0; i < this.objects.length; i++) {
       if (this.objects[i].constructor === Wall) walls.push(this.objects[i]);
     }
-
-
-    while (moneys.length + walls.length < 3) {
-      if (!this.__moneyRespone(moneys, walls)) {
-        break;
-      }
-    }
-    if (moneys.length + walls.length < 5) {
-      if (random() > 0.5) {
-        this.__moneyRespone(moneys, walls);
-      }
-    }
-
-  }
-
-  __moneyRespone(moneys, walls) {
-    //出現可能位置の探索
-    let sponablePlaces = [];
-    for (let i = 0; i < this.wid; i++) {
-      for (let j = 0; j < this.hig; j++) {
-        let flag = true;
-        for (let k = 0; k < this.players.length; k++) {
-          if ((this.players[k].x - 1 <= i && i <= this.players[k].x + 1 && j == this.players[k].y) ||
-            (this.players[k].y - 1 <= j && j <= this.players[k].y + 1 && i == this.players[k].x))
-            flag = false;
+    if(moneys.length + walls.length < 4){
+      if(random() > 0.5){
+        //出現可能位置の探索
+        let sponablePlaces = [];
+        for(let i=0; i<this.wid; i++){
+          for(let j=0; j<this.hig; j++){
+            let flag = true;
+            for(let k=0; k<this.players.length; k++){
+              if((this.players[k].x-1 <= i && i <= this.players[k].x+1 && j == this.players[k].y)  ||
+                 (this.players[k].y-1 <= j && j <= this.players[k].y+1 && i == this.players[k].x))
+                flag = false;
+            }
+            for(let k=0; k<this.objects.length; k++){
+              if((this.objects[k].x-1 <= i && i <= this.objects[k].x+1 && j == this.objects[k].y)  ||
+                 (this.objects[k].y-1 <= j && j <= this.objects[k].y+1 && i == this.objects[k].x))
+                flag = false;
+            }
+            if(flag)sponablePlaces.push([i,j]);
+          }
         }
-        for (let k = 0; k < this.objects.length; k++) {
-          if ((this.objects[k].x - 1 <= i && i <= this.objects[k].x + 1 && j == this.objects[k].y) ||
-            (this.objects[k].y - 1 <= j && j <= this.objects[k].y + 1 && i == this.objects[k].x))
-            flag = false;
-        }
-        if (flag) sponablePlaces.push([i, j]);
-      }
-    }
-
-
-    //出現位置の抽選
-    if (sponablePlaces.length > 0) {
-      let idx = int(random(0, sponablePlaces.length));
-      let pos = sponablePlaces[idx];
-      print("マネーリスポン :" + pos[0] + ", " + pos[1]);
-      if (random() > 0.6) {
-        let o;
-        if (moneys.length < 4){
-          o = new Money(this, pos[0], pos[1], 60 + 20 * int(random(-1, 3)));
-          this.objects.push(o);
-          moneys.push(o);
-        }
-        else if (walls.length < 2){
-          o = new Wall(this, pos[0], pos[1], 3, 100 + 60 * int(random(-1, 2)));
-          this.objects.push(o);
-          walls.push(o);
-        }
-      } else {
-        if (walls.length < 2){
-          let o = new Wall(this, pos[0], pos[1], 3, 100 + 60 * int(random(-1, 2)));
-          this.objects.push(o);
-          walls.push(o);
-          
+        
+        
+        //出現位置の抽選
+        if(sponablePlaces.length>0){
+          let idx = int(random(0, sponablePlaces.length));
+          let pos = sponablePlaces[idx];
+          print("マネーリスポン :"+pos[0]+", "+pos[1]);
+          if(random() > 0.6){
+            if(moneys.length<3)
+            this.objects.push(new Money(this, pos[0], pos[1], 60 + 20*int(random(-1,3))));
+            else if(walls.length<1)
+            this.objects.push(new Wall(this, pos[0], pos[1], 3, 100 + 60*int(random(-1,2))));
+          }else{
+            if(walls.length<2)
+            this.objects.push(new Wall(this, pos[0], pos[1], 3, 100 + 60*int(random(-1,2))));
+          }
+        }else{
+          print("マネーリスポン不可");
         }
       }
-    } else {
-      print("マネーリスポン不可");
-      return false;
     }
-    return true;
 
   }
 
@@ -372,10 +348,7 @@ class Stage {
       line(x, y + size * j, x + size * this.wid, y + size * j);
     textAlign(LEFT, BOTTOM);
     strokeWeight(1);
-    text("turn:" + this.stepCount+
-         " limit: "+(timer.limit-timer.count)+
-         "", this.x - this.size / 2, this.y - this.size / 2 - 2);
-    
+    text("turn:" + this.stepCount, this.x - this.size / 2, this.y - this.size / 2 - 2);
   }
 }
 
@@ -446,7 +419,7 @@ class Player {
 
     switch (colledType) {
       case 3:
-        this.stun = 1;
+        this.stun = 3;
         break;
     }
 
@@ -529,7 +502,7 @@ class Player {
       let x = stage.x + this.nextStep()[0] * stage.size;
       let y = stage.y + this.nextStep()[1] * stage.size;
       noStroke();
-      //ellipse(x + 5.0 * cos(rad), y + 5.0 * sin(rad), 30, 30);
+      ellipse(x + 5.0 * cos(rad), y + 5.0 * sin(rad), 30, 30);
       stroke(0);
     }
 
@@ -560,7 +533,7 @@ class Player {
       "", x, y);
 
     x += (width - 40) / 8;
-    y = height / 2 - (width - 40) / 8 - 20;
+    y = height/2 - (width - 40) / 8 - 20;
     fill(220);
     ellipse(x, y, (width - 40) / 6, (width - 40) / 6);
     if (this.command != -1) {
@@ -652,18 +625,18 @@ class Wall extends Objects {
     this.hp = hp;
     this.mass = mass;
   }
-
-  hit() {
+  
+  hit(){
     this.hp--;
   }
 
   display() {
     this.__setDrawXY();
-
-    fill(140 + 70.0 * max((3.0 - this.hp) / 3.0, 0));
+    
+    fill(140 + 70.0 * max((3.0-this.hp)/3.0, 0));
     stroke(100);
     let siz = 34;
-    rect(this.drawX - siz / 2, this.drawY - siz / 2, siz, siz);
+    rect(this.drawX - siz/2, this.drawY - siz/2 , siz, siz);
   }
 }
 
@@ -676,292 +649,98 @@ class Wall extends Objects {
 function setup() {
   createCanvas(400, 800);
   stage = new Stage();
-  //kc = new KBController(stage);
-  timer = new Timer(120);
-  //makeButtons();
+  kc = new KBController(stage);
+  buttons = [];
+  buttons.push(new Button(100, 600, 60, color(255, 160, 160)));
+  buttons.push(new Button(300-20, 600 - 70, 30, color(160)));
+  buttons.push(new Button(300-20 + 70, 600, 30, color(160)));
+  buttons.push(new Button(300-20, 600 + 70, 30, color(160)));
+  buttons.push(new Button(300-20 - 70, 600, 30, color(160)));
+  
+  buttons.push(new Button(300-20 , 600, 30, color(200,160,200)));
+  
+  
+  buttons.push(new Button(140    , 600-120, 30, color(180,160,230)));
+  buttons.push(new Button(300-20+ 70, 600-120, 30, color(100)));
 }
 
 function draw() {
   background(255);
 
   stage.update();
-  timer.update();
 
 
   stage.display();
-  //for(let i=0; i<buttons.length; i++)buttons[i].display();
-  //kc.display();
-  timer.display();
-  stroke(70);
+  for(let i=0; i<buttons.length; i++)buttons[i].display();
+  kc.display();
 }
 
 function mousePressed() {
-}
-
-let delCount;
-function keyPressed() {
-  switch (keyCode) {
-
-    case RETURN:
-      if (!timer.counting) timer.countStart();
-      else timer.countStop();
-      break;
-    case BACKSPACE:
-      stage.__init();
-      timer.countStop();
-      break;
+  
+  for(let i=0; i<buttons.length; i++){
+    if(!buttons[i].isPressed(mouseX, mouseY))continue;
+    
+    switch(i){
+      case 0:
+        stage.step();
+        break;
+      case 1:case 2:case 3:case 4:case 5:
+        kc.input(i-1);
+        break;
+      case 6:
+        kc.input(-2);
+        break;
+      case 7:
+        kc.input(-1);
+        break;
+    }
   }
   
-  switch(key){
-    case ",":
-    if(!timer.counting)timer.limit-=10;
-    break;
-    case ".":
-    if(!timer.counting)timer.limit+=10;
-    break
-  }
-  multiPlayKeyInput();
 }
 
-function keyReleased() {
-  multiPlayKeyRelease();
-}
-
-function multiPlayKeyInput() {
-  let p;
-  p = stage.players[0];
-  switch (key) {
-    case "w":
-      p.command = 0;
-      p.dir = 0;
-      break;
-    case "d":
-      p.command = 1;
-      p.dir = 1;
-      break;
-    case "s":
-      p.command = 2;
-      p.dir = 2;
-      break;
-    case "a":
-      p.command = 3;
-      p.dir = 3;
-      break;
-    case "e":
-      p.command = 4;
-      break;
-  }
-
-  p = stage.players[1];
-  switch (key) {
-    case "i":
-      p.command = 0;
-      p.dir = 0;
-      break;
-    case "l":
-      p.command = 1;
-      p.dir = 1;
-      break;
-    case "k":
-      p.command = 2;
-      p.dir = 2;
-      break;
-    case "j":
-      p.command = 3;
-      p.dir = 3;
-      break;
-    case "o":
-      p.command = 4;
-      break;
-  }
-
-  p = stage.players[2];
-  switch (key) {
-    case "t":
-      p.command = 0;
-      p.dir = 0;
-      break;
-    case "h":
-      p.command = 1;
-      p.dir = 1;
-      break;
-    case "g":
-      p.command = 2;
-      p.dir = 2;
-      break;
-    case "f":
-      p.command = 3;
-      p.dir = 3;
-      break;
-    case "y":
-      p.command = 4;
-      break;
-  }
-
-  p = stage.players[3];
+function keyPressed() {
   switch (keyCode) {
-    case UP_ARROW:
-      p.command = 0;
-      p.dir = 0;
-      break;
-    case RIGHT_ARROW:
-      p.command = 1;
-      p.dir = 1;
-      break;
-    case DOWN_ARROW:
-      p.command = 2;
-      p.dir = 2;
-      break;
-    case LEFT_ARROW:
-      p.command = 3;
-      p.dir = 3;
-      break;
-    case SHIFT:
-      p.command = 4;
-      break;
-  }
-}
-
-function multiPlayKeyRelease() {
-  if (timer.limit - timer.count < timer.limit / 4) return;
-  let p;
-  p = stage.players[0];
-  switch (key) {
-    case "w":
-    case "d":
-    case "s":
-    case "a":
-    case "e":
-      p.command = -1;
-      break;
-  }
-
-  p = stage.players[1];
-  switch (key) {
-    case "i":
-    case "l":
-    case "k":
-    case "j":
-    case "o":
-      p.command = -1;
-  }
-
-  p = stage.players[2];
-  switch (key) {
-    case "t":
-    case "h":
-    case "g":
-    case "f":
-    case "y":
-      p.command = -1;
-  }
-
-  p = stage.players[3];
-  switch (keyCode) {
-    case UP_ARROW:
-    case RIGHT_ARROW:
-    case DOWN_ARROW:
-    case LEFT_ARROW:
-    case SHIFT:
-      p.command = -1;
-      break;
-  }
-}
-
-class Timer {
-  constructor(limit) {
-    this.limit = limit;
-
-    this.counting = false;
-    this.count = 0;
-
-    this.colorRate = [];
-    this.colorRate.push(0);
-    this.colorRate.push(0);
-    this.colorRate.push(0);
-    this.colorRate.push(0);
-  }
-
-  countStart() {
-    this.counting = true;
-    this.count = 0;
-  }
-  countStop() {
-    this.counting = false;
-    this.count = 0;
-  }
-
-  update() {
-    if (!this.counting) return;
-    this.count++;
-    if (this.count == int(this.limit / 4 * 1)) this.colorRate[0] = 1.4;
-    if (this.count == int(this.limit / 4 * 2)) this.colorRate[1] = 1.4;
-    if (this.count == int(this.limit / 4 * 3)) this.colorRate[2] = 1.4;
-    if (this.count >= this.limit) {
-      this.colorRate[3] = 1.8;
-      this.count %= this.limit;
+    case RETURN:
       stage.step();
-    }
-    for (let i = 0; i < this.colorRate.length; i++) this.colorRate[i] *= 0.9;
+      break;
+    case SHIFT:
+      kc.input(-2);
+      break;
+    case DELETE:
+    case BACKSPACE:
+      kc.input(-1);
+      break;
+    case CONTROL:
+      kc.input(4);
+      break;
+
   }
 
-  display() {
-    let i;
-    stroke(70);
-
-    i = 0;
-    fill(255, 255 - 140 * this.colorRate[i], 255 - 140 * this.colorRate[i]);
-    ellipse(40 + (width - 20) / 4 * i, height / 4 * 3, 40, 40);
-    i = 1;
-    fill(255, 255 - 140 * this.colorRate[i], 255 - 140 * this.colorRate[i]);
-    ellipse(40 + (width - 20) / 4 * i, height / 4 * 3, 40, 40);
-    i = 2;
-    fill(255, 255 - 140 * this.colorRate[i], 255 - 140 * this.colorRate[i]);
-    ellipse(40 + (width - 20) / 4 * i, height / 4 * 3, 40, 40);
-    i = 3;
-    fill(255, 255 - 140 * this.colorRate[i], 255 - 140 * this.colorRate[i]);
-    ellipse(40 + (width - 20) / 4 * i, height / 4 * 3, 80, 80);
-    fill(0);
-  }
+  let arrow = arrow2num(keyCode);
+  if (arrow != null) kc.input(arrow);
 }
 
 class Button {
 
-  constructor(x, y, size, color) {
+  constructor(x,y,size,color){
     this.x = x;
     this.y = y;
     this.size = size;
     this.color = color
   }
-
-  display() {
+  
+  display(){
     fill(this.color);
     stroke(150);
-    ellipse(this.x, this.y, this.size * 2, this.size * 2);
+    ellipse(this.x, this.y, this.size*2, this.size*2);
   }
-
-  isPressed(x, y) {
-    return dist(x, y, this.x, this.y) < this.size;
-
+  
+  isPressed(x, y){
+    return dist(x,y,this.x, this.y) < this.size;
+    
   }
-
+  
 }
-
-function makeButtons() {
-  buttons = [];
-  buttons.push(new Button(100, 600, 60, color(255, 160, 160)));
-  buttons.push(new Button(300 - 20, 600 - 70, 30, color(160)));
-  buttons.push(new Button(300 - 20 + 70, 600, 30, color(160)));
-  buttons.push(new Button(300 - 20, 600 + 70, 30, color(160)));
-  buttons.push(new Button(300 - 20 - 70, 600, 30, color(160)));
-
-  buttons.push(new Button(300 - 20, 600, 30, color(200, 160, 200)));
-
-
-  buttons.push(new Button(140, 600 - 120, 30, color(180, 160, 230)));
-  buttons.push(new Button(300 - 20 + 70, 600 - 120, 30, color(100)));
-}
-
 class KBController {
   constructor(stage) {
     this.stage = stage;
@@ -1001,7 +780,7 @@ class KBController {
 
     x = 20 + (width - 40) / 4 * this.cursol;
     x += (width - 40) / 8;
-    y = height / 2 - (width - 40) / 8 - 20;
+    y = height/2 - (width - 40) / 8 - 20;
     fill(p.myColor);
     ellipse(x, y, (width - 40) / 6, (width - 40) / 6);
 
