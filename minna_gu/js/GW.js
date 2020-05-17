@@ -2,6 +2,9 @@
 //
 let stage;
 
+let missMoneyRate = 20;
+let stunStepNum = 0;
+
 class Stage {
   constructor() {
     this.__init();
@@ -20,11 +23,15 @@ class Stage {
     this.lastStepTime = 0;
     this.stepCount = 0;
 
+    this.playersBuf = [];
+    this.playersBuf.push(new Player(this, 0, 1, 0, 2));
+    this.playersBuf.push(new Player(this, 1, 4, 3, 0));
+    this.playersBuf.push(new Player(this, 2, 1, 3, 0));
+    this.playersBuf.push(new Player(this, 3, 4, 0, 2));
+    
     this.players = [];
-    this.players.push(new Player(this, 0, 1, 0, 2));
-    this.players.push(new Player(this, 1, 4, 3, 0));
-    this.players.push(new Player(this, 2, 1, 3, 0));
-    this.players.push(new Player(this, 3, 4, 0, 2));
+    for(let i=0; i<4; i++)this.players.push(this.playersBuf[i]);
+    
 
     this.objects = [];
     this.objects.push(new Money(this, 3, 2, 60));
@@ -65,6 +72,70 @@ class Stage {
 
 
   //移動可能かどうかの判定など
+  moneyMiss(p){
+    if(p.money<=0)return;
+    let points = []
+    if(p.dir == 0 || p.dir == 2){//縦移動
+      let pos;
+      pos = [p.x-1, p.y];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+      pos = [p.x+1, p.y];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+      let i = p.dir - 1;
+      pos = [p.x, p.y - i];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+    }
+    else{//横移動
+      let pos;
+      pos = [p.x, p.y-1];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+      pos = [p.x, p.y+1];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+      let i = p.dir - 2;
+      pos = [p.x+i, p.y];
+      if(this.__objectCollision(pos)==null && this.__edgeCollision(pos)==false){
+        points.push(pos);
+      }
+    }
+    
+    //お金を落とす
+    let missMoney = int(p.money * (missMoneyRate / 100.0));
+    if(points.length>=2){
+      p.money -= missMoney;
+      this.__moneyOverlay(points[0][0], points[0][1], int(missMoney/2));
+      this.__moneyOverlay(points[1][0], points[1][1], int(missMoney/2));
+    }else if (points.length==1){
+      p.money -= missMoney;
+      this.__moneyOverlay(points[0][0], points[0][1], int(missMoney/2));
+    }
+    
+  }
+  
+  __moneyOverlay(x, y, mass){
+    let moneys = [];
+    for (let i = 0; i < this.objects.length; i++) {
+      if (this.objects[i].constructor === Money) moneys.push(this.objects[i]);
+    }
+    
+    for (let i = 0; i < moneys.length; i++) {
+      if (moneys[i].x == x && moneys[i].y == y){
+        moneys[i].mass += mass;
+        return;
+      }
+    }
+    this.objects.push(new Money(this, x, y, mass));
+  }
+  
   __playerMove() {
     let next = [];
     let type = []; //衝突タイプ
@@ -80,10 +151,11 @@ class Stage {
         next[i] = [this.players[i].x, this.players[i].y];
         type[i] = 2; //壁衝突
       }
-      for (let j = 0; j < this.objects.length; j++) {
-        let o = this.objects[j];
-        if (o.movable) continue;
-        if ((next[i][0] != o.x) || (next[i][1] != o.y)) continue;
+      
+      let o = this.__objectCollision(next[i]);
+      
+      
+      if(o!=null) {
         next[i] = [this.players[i].x, this.players[i].y];
         type[i] = 2; //壁衝突
 
@@ -194,6 +266,16 @@ class Stage {
     }
     print(log + ")");
 
+  }
+  
+  __objectCollision(posit){ //戻り値: Objects型
+    for (let j = 0; j < this.objects.length; j++) {
+        let o = this.objects[j];
+        if (o.movable) continue;
+        if ((posit[0] != o.x) || (posit[1] != o.y)) continue;
+        return o;
+    }
+    return null;
   }
 
   __edgeCollision(posit) {
@@ -374,6 +456,8 @@ class Stage {
     strokeWeight(1);
     text("turn:" + this.stepCount+
          " limit: "+(timer.limit-timer.count)+
+         " mmRate: "+(missMoneyRate)+
+         " stun...: "+(stunStepNum)+
          "", this.x - this.size / 2, this.y - this.size / 2 - 2);
     
   }
@@ -446,7 +530,8 @@ class Player {
 
     switch (colledType) {
       case 3:
-        this.stun = 1;
+        this.stage.moneyMiss(this);
+        this.stun = stunStepNum;
         break;
     }
 
@@ -718,6 +803,45 @@ function keyPressed() {
     break;
     case ".":
     if(!timer.counting)timer.limit+=10;
+    break
+    
+    case "n":
+    if(!timer.counting)missMoneyRate-=5;
+    break;
+    case "m":
+    if(!timer.counting)missMoneyRate+=5;
+    break
+    
+    case "v":
+    if(!timer.counting)stunStepNum-=1;
+    break;
+    case "b":
+    if(!timer.counting)stunStepNum+=1;
+    break
+    
+    case "1":
+    if(!timer.counting&&stage.stepCount==0){
+      stage.players=[];
+      for(let i=0; i<1; i++)stage.players.push(stage.playersBuf[i]);
+      }
+    break;
+    case "2":
+    if(!timer.counting&&stage.stepCount==0){
+      stage.players=[];
+      for(let i=0; i<2; i++)stage.players.push(stage.playersBuf[i]);
+      }
+    break
+    case "3":
+    if(!timer.counting&&stage.stepCount==0){
+      stage.players=[];
+      for(let i=0; i<3; i++)stage.players.push(stage.playersBuf[i]);
+      }
+    break;
+    case "4":
+    if(!timer.counting&&stage.stepCount==0){
+      stage.players=[];
+      for(let i=0; i<4; i++)stage.players.push(stage.playersBuf[i]);
+      }
     break
   }
   multiPlayKeyInput();
